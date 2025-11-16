@@ -19,7 +19,12 @@ services:
       - DOMAIN_NAME=${DOMAIN_NAME:-localhost}
     volumes:
       - fusionpbx_config:/etc/fusionpbx
-    command: ["/bin/bash", "-c", "service postgresql start && sleep 10 && service freeswitch start && sleep 5 && service nginx start && service php8.3-fpm start && sleep 5 && tail -f /var/log/nginx/error.log /var/log/freeswitch/freeswitch.log"]
+    command:
+      [
+        "/bin/bash",
+        "-c",
+        "service postgresql start && sleep 10 && service freeswitch start && sleep 5 && service nginx start && service php8.3-fpm start && sleep 5 && tail -f /var/log/nginx/error.log /var/log/freeswitch/freeswitch.log",
+      ]
 
 volumes:
   fusionpbx_config:
