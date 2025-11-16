@@ -19,7 +19,12 @@ services:
       - DOMAIN_NAME=${DOMAIN_NAME:-localhost}
     volumes:
       - fusionpbx_config:/etc/fusionpbx
-    entrypoint: ["/usr/sbin/init"]
+    command:
+      [
+        "/bin/bash",
+        "-c",
+        "service postgresql start && service freeswitch start && service nginx start && service php8.3-fpm start && tail -f /var/log/freeswitch/freeswitch.log",
+      ]
 
 volumes:
   fusionpbx_config:
