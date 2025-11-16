@@ -20,14 +20,12 @@ sofia_version=1.13.17                       # release version for sofia-sip to u
 database_name=fusionpbx                     # Database name (safe characters A-Z, a-z, 0-9)
 database_username=fusionpbx                 # Database username (safe characters A-Z, a-z, 0-9)
 database_password=${DATABASE_PASSWORD:-password}	# random or a custom value (safe characters A-Z, a-z, 0-9)
-#system =apt install  postgres
-database_repo=official                     # PostgreSQL official, system (changed to official for external DB)
-database_version=16                        # requires repo official (match our postgres:16-alpine)
-database_host=db                           # hostname or IP address (use service name from docker-compose)
-database_port=5432                         # port number
-database_backup=false                      # true or false
-
-# General Settings
+#system =apt install  postgres 
+database_repo=system                        # PostgreSQL official, system
+database_version=18                         # requires repo official
+database_host=ip_address                    # hostname or IP address
+database_port=5432                          # port number
+database_backup=false                       # true or false# General Settings
 php_version=8.3                             # PHP version 8.4, 8.3, 8.2, 8.1
 letsencrypt_folder=true                     # true or false
 

@@ -1,6 +1,6 @@
 services:
   app:
-    build: .
+    image: michaelfangtw/fusionpbx-docker:5.4
     restart: always
     ports:
       # Web interface - map to different ports to avoid Coolify conflicts
@@ -19,20 +19,7 @@ services:
       - DOMAIN_NAME=${DOMAIN_NAME:-localhost}
     volumes:
       - fusionpbx_config:/etc/fusionpbx
-    depends_on:
-      - db
     entrypoint: ["/usr/sbin/init"]
-
-  db:
-    image: postgres:16-alpine
-    restart: always
-    environment:
-      - POSTGRES_DB=fusionpbx
-      - POSTGRES_USER=fusionpbx
-      - POSTGRES_PASSWORD=${DB_PASSWORD:-fusionpbx_password}
-    volumes:
-      - fusionpbx_db:/var/lib/postgresql/data
 
 volumes:
   fusionpbx_config:
-  fusionpbx_db:
