@@ -124,13 +124,40 @@ Once the container is running, access FusionPBX at:
 - **Username**: `admin@localhost`
 - **Password**: `YOUR_PASSWORD` *(set in .env or config.sh)*
 
+## ☁️ Coolify Deployment
+
+This setup has been adapted to work with Coolify's service templates. Use the **wordpress-with-mysql** service as a base and modify it for FusionPBX.
+
+### Coolify Setup Steps
+
+1. **Create a new service** in Coolify using the "wordpress-with-mysql" template
+2. **Replace the docker-compose.yaml** with the modified version in this repository
+3. **Configure environment variables**:
+   - `DB_PASSWORD`: Set a secure database password
+   - `DOMAIN_NAME`: Your Coolify domain (automatically set)
+4. **Adjust port configuration** in Coolify:
+   - Web ports: 80, 443
+   - RTP ports: 16384-32768/udp (for VoIP traffic)
+5. **Deploy the service**
+
+### Coolify-Specific Changes
+
+The Coolify-compatible version includes:
+
+- **Named volumes** instead of host mounts for better portability
+- **Explicit port mapping** instead of host networking
+- **PostgreSQL database** (FusionPBX's native database)
+- **Removed privileged mode** for security compliance
+- **Environment-based configuration** for database connections
+
 ## 📁 Project Structure
 
 ```
 fusionpbx-install-docker/
-├── config/                    # Configuration files
+├── config/                    # Configuration files (legacy)
 │   └── fusionpbx/            # FusionPBX configuration
 ├── docker-compose.yaml       # Docker Compose configuration
+├── .env.example             # Environment variables template
 ├── Dockerfile                # Docker image definition
 ├── build.sh                  # Build script
 ├── compose.sh                # Compose helper script
@@ -186,16 +213,19 @@ Configuration data is persisted through Docker volumes:
 If you can't access the web interface at [http://localhost](http://localhost):
 
 1. **Check container status:**
+
    ```bash
    docker ps
    ```
 
 2. **View container logs:**
+
    ```bash
    docker logs fusionpbx
    ```
 
 3. **Check port availability:**
+
    ```bash
    sudo netstat -tulpn | grep :80
    ```
@@ -205,11 +235,13 @@ If you can't access the web interface at [http://localhost](http://localhost):
 If you cannot log in to the web interface:
 
 1. **Access the container:**
+
    ```bash
    docker exec -it fusionpbx /bin/bash
    ```
 
 2. **Backup existing configuration:**
+
    ```bash
    mv /etc/fusionpbx/config.conf /etc/fusionpbx/config.conf.old
    ```
@@ -226,16 +258,19 @@ If you cannot log in to the web interface:
 If you encounter database-related login failures:
 
 1. **Access the container:**
+
    ```bash
    docker exec -it fusionpbx /bin/bash
    ```
 
 2. **Navigate to resources directory:**
+
    ```bash
    cd /usr/src/fusionpbx-install.sh/ubuntu/resources
    ```
 
 3. **Recreate the database:**
+
    ```bash
    ./postgresql.sh    # Create database
    ./finish.sh        # Set admin credentials

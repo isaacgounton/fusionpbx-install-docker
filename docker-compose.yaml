@@ -1,36 +1,38 @@
 services:
-  pbx:
-    # Build the image from the local Dockerfile so the local modified installer
-    # (copied from workspace) is included in the image.
-    # you can build by yourself
-    #build:
-    #  context: .
-    #  dockerfile: Dockerfile
-    
-    #using docker hub image
-    image: michaelfangtw/fusionpbx-docker:5.4
-
-    # Use host networking to allow the container to access all host ports.
-    # This is necessary for the large RTP port range.
-    network_mode: "host"
-
-    # Set the container name for eaml: line 7: did not find expected key
-    container_name: fusionpbx
-
-    # Restart the container automatically if it fails or if the host reboots
+  app:
+    build: .
     restart: always
-    privileged: true
-
-    # Load environment variables from a .env file at the compose root
-    #env_file:
-    #  - .env
-
-    # Persist fusionpbx webapp, configs and FreeSWITCH autoload configs on the host
+    ports:
+      # Web interface - map to different ports to avoid Coolify conflicts
+      - "8080:80"
+      - "8443:443"
+      # SIP signaling ports
+      - "5060:5060"
+      - "5060:5060/udp"
+      - "5061:5061"
+      # RTP port range for VoIP (conservative 100 ports for testing)
+      - "16384-16484:16384-16484/udp"
+    environment:
+      - POSTGRES_DB=fusionpbx
+      - POSTGRES_USER=fusionpbx
+      - POSTGRES_PASSWORD=${DB_PASSWORD:-fusionpbx_password}
+      - DOMAIN_NAME=${DOMAIN_NAME:-localhost}
     volumes:
-      - ./config/fusionpbx:/etc/fusionpbx
-
-    #
-    # Maps to the /usr/sbin/init command. This is the main process for the container.
+      - fusionpbx_config:/etc/fusionpbx
+    depends_on:
+      - db
     entrypoint: ["/usr/sbin/init"]
 
+  db:
+    image: postgres:16-alpine
+    restart: always
+    environment:
+      - POSTGRES_DB=fusionpbx
+      - POSTGRES_USER=fusionpbx
+      - POSTGRES_PASSWORD=${DB_PASSWORD:-fusionpbx_password}
+    volumes:
+      - fusionpbx_db:/var/lib/postgresql/data
 
+volumes:
+  fusionpbx_config:
+  fusionpbx_db:

@@ -39,18 +39,17 @@ RUN sed -i '/cdrom:/d' /etc/apt/sources.list && \
     apt-get update && \
     apt-get upgrade -y
 
-# Install system dependencies in a single RUN for efficiency
+# Install system dependencies (excluding systemd and PostgreSQL)
 RUN apt-get install -y \
-        wget \
-        lsb-release \
-        systemd \
-        systemd-sysv \
-        ca-certificates \
-        dialog \
-        nano \
-        nginx \
-        build-essential \
-        snmpd
+    wget \
+    lsb-release \
+    ca-certificates \
+    dialog \
+    nano \
+    nginx \
+    build-essential \
+    snmpd \
+    supervisor
 
 # Configure SNMP community and restart service
 RUN echo "rocommunity public" > /etc/snmp/snmpd.conf && \
@@ -84,7 +83,7 @@ RUN . ./resources/config.sh && \
 RUN . ./resources/config.sh && \
     . ./resources/colors.sh && \
     . ./resources/environment.sh && \
-    ./resources/postgresql.sh
+    ./resources/postgresql.sh || echo "Skipping PostgreSQL installation for external DB"
 
 RUN . ./resources/config.sh && \
     . ./resources/colors.sh && \
@@ -108,4 +107,12 @@ RUN . ./resources/config.sh && \
 
 RUN rm -rf /var/lib/apt/lists/*
 
-ENTRYPOINT ["/usr/sbin/init"]
+# Create a simple startup script for Coolify compatibility
+RUN echo '#!/bin/bash\n\
+    service nginx start\n\
+    service php8.3-fpm start\n\
+    freeswitch -nc\n\
+    tail -f /var/log/freeswitch/freeswitch.log' > /usr/local/bin/start-fusionpbx.sh && \
+    chmod +x /usr/local/bin/start-fusionpbx.sh
+
+ENTRYPOINT ["/usr/local/bin/start-fusionpbx.sh"]
